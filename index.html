@@ -148,7 +148,6 @@ tr:last-child td{border-bottom:0}
           <th data-k="fonte">Fonte</th>
           <th data-k="pst">Seções</th>
           <th data-k="shareAtual">Lula apurado</th>
-          <th data-k="share22">Lula 2022</th>
           <th data-k="share">Lula usado</th>
           <th data-k="eleitorado">Eleitorado</th>
           <th data-k="margem">Margem projetada</th>
@@ -160,7 +159,7 @@ tr:last-child td{border-bottom:0}
 
   <div class="foot">
     Fonte: arquivos públicos de resultados do TSE (eleições 6257 e 6258). Base 2022: 2º turno Lula × Bolsonaro por UF.
-    Eleitorado: 1º turno de 2026. Antes do limiar, a UF fica fora do total; depois, entra com a divisão atual da apuração, extrapolada para o eleitorado inteiro da UF. A coluna Lula 2022 é só referência.
+    Eleitorado: 1º turno de 2026. Antes do limiar, a UF fica fora do total; depois, entra com a divisão atual da apuração, extrapolada para o eleitorado inteiro da UF.
   </div>
 </div>
 
@@ -293,7 +292,6 @@ tr:last-child td{border-bottom:0}
         <td>${r.fonte === "apuração" ? '<span class="tag ap">apuração</span>' : '<span class="tag b22">fora do total</span>'}</td>
         <td><span class="prog"><i style="width:${Math.min(100, r.pst)}%"></i></span>${fmtPst(r.pst)}</td>
         <td>${r.shareAtual == null ? "–" : fmtPct(r.shareAtual, 1)}</td>
-        <td>${fmtPct(r.share22, 1)}</td>
         <td>${r.share == null ? "–" : `${fmtPct(r.share, 1)}<span class="split"><i style="width:${r.share*100}%"></i></span>`}</td>
         <td>${fmtN(r.eleitorado)}</td>
         <td class="${r.margem == null ? "" : r.margem >= 0 ? "mg-l" : "mg-f"}">${r.margem == null ? "–" : (r.margem >= 0 ? "Lula +" : "Flávio +") + fmtN(Math.abs(r.margem))}</td>
