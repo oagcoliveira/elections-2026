@@ -47,9 +47,10 @@
     return base;
   }
 
-  // opts: { limiar: 10, peso: "validos" | "eleitorado" }
+  // opts: { limiar: 5, peso: "validos" | "eleitorado" }
+  // UFs abaixo do limiar de seções totalizadas aparecem na tabela, mas ficam fora do total.
   function projetar(base, vivo, br, opts) {
-    const limiar = opts.limiar ?? 10;
+    const limiar = opts.limiar ?? 5;
     const linhas = [];
     let totL = 0, totF = 0;
     for (const uf of UFS) {
@@ -58,23 +59,23 @@
       const l = votos(p, LULA), f = votos(p, FLAVIO);
       const est = num(p.e && p.e.est);
       const shareAtual = (l + f) ? l / (l + f) : null;
-      let fonte, share, taxa;
-      if (pst >= limiar && (l + f) > 0) {
-        fonte = "apuração"; share = shareAtual; taxa = est ? (l + f) / est : b.taxa1t;
-      } else {
-        fonte = "2022"; share = b.share22; taxa = b.taxa1t;
+      if (pst < limiar || (l + f) === 0) {
+        linhas.push({ uf, nome: NOMES[uf], fonte: "fora", pst, shareAtual, share22: b.share22, share: null,
+                      eleitorado: b.eleitorado, peso: 0, margem: null, votosL: l, votosF: f });
+        continue;
       }
-      if (opts.peso === "eleitorado") taxa = 1;
+      const share = shareAtual;
+      const taxa = opts.peso === "eleitorado" ? 1 : (est ? (l + f) / est : b.taxa1t);
       const peso = b.eleitorado * taxa;
       const pl = peso * share, pf = peso * (1 - share);
       totL += pl; totF += pf;
-      linhas.push({ uf, nome: NOMES[uf], fonte, pst, shareAtual, share22: b.share22, share,
+      linhas.push({ uf, nome: NOMES[uf], fonte: "apuração", pst, shareAtual, share22: b.share22, share,
                     eleitorado: b.eleitorado, peso, margem: pl - pf, votosL: l, votosF: f });
     }
     const bl = votos(br || {}, LULA), bf = votos(br || {}, FLAVIO);
     return {
       linhas,
-      lula: totL / (totL + totF),
+      lula: (totL + totF) ? totL / (totL + totF) : null,
       margem: totL - totF,
       tse: { pst: num(br && br.s && br.s.pst), lula: (bl + bf) ? bl / (bl + bf) : null,
              votosL: bl, votosF: bf, hg: br && br.hg, dg: br && br.dg },

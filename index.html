@@ -96,7 +96,7 @@ tr:last-child td{border-bottom:0}
 
   <div class="grid">
     <div class="card kpi"><div class="k">Seções totalizadas</div><div class="v" id="kPst">–</div><div class="s" id="kHg">–</div></div>
-    <div class="card kpi"><div class="k">UFs usando apuração</div><div class="v" id="kUfs">–</div><div class="s">o resto usa 2022</div></div>
+    <div class="card kpi"><div class="k">UFs usando apuração</div><div class="v" id="kUfs">–</div><div class="s">o resto fica fora do total</div></div>
     <div class="card kpi"><div class="k">Lula · votos apurados</div><div class="v" id="kVL">–</div><div class="s" id="kVLs">–</div></div>
     <div class="card kpi"><div class="k">Flávio · votos apurados</div><div class="v" id="kVF">–</div><div class="s" id="kVFs">–</div></div>
   </div>
@@ -114,9 +114,9 @@ tr:last-child td{border-bottom:0}
     <section class="card ctrl">
       <h2>Parâmetros</h2>
       <div class="f">
-        <label for="limiar">Limiar para usar a apuração da UF</label>
-        <input id="limiar" type="number" min="0" max="100" step="1" value="10">
-        <div class="hint">% de seções totalizadas na UF</div>
+        <label for="limiar">Limiar para contar a UF no total</label>
+        <input id="limiar" type="number" min="0" max="100" step="1" value="5">
+        <div class="hint">% de seções totalizadas na UF; abaixo disso a UF aparece, mas não entra no total</div>
       </div>
       <div class="f">
         <label for="peso">Peso de cada UF</label>
@@ -124,7 +124,7 @@ tr:last-child td{border-bottom:0}
           <option value="validos">Votos válidos projetados</option>
           <option value="eleitorado">Só eleitorado (1º turno)</option>
         </select>
-        <div class="hint">Válidos = eleitorado × taxa de válidos (1º turno antes do limiar, apuração depois)</div>
+        <div class="hint">Válidos = eleitorado × taxa de válidos (taxa de válidos da apuração)</div>
       </div>
       <div class="f">
         <label for="intervalo">Atualizar a cada</label>
@@ -160,7 +160,7 @@ tr:last-child td{border-bottom:0}
 
   <div class="foot">
     Fonte: arquivos públicos de resultados do TSE (eleições 6257 e 6258). Base 2022: 2º turno Lula × Bolsonaro por UF.
-    Eleitorado: 1º turno de 2026. Antes do limiar, a UF usa a divisão de 2022; depois, a divisão atual da apuração, extrapolada para o eleitorado inteiro da UF.
+    Eleitorado: 1º turno de 2026. Antes do limiar, a UF fica fora do total; depois, entra com a divisão atual da apuração, extrapolada para o eleitorado inteiro da UF. A coluna Lula 2022 é só referência.
   </div>
 </div>
 
@@ -210,7 +210,7 @@ tr:last-child td{border-bottom:0}
       const [{ out, erros }, br] = await Promise.all([todas(E2), getJSON(url(E2, "br")).catch(() => null)]);
       ultimo = { vivo: out, br };
       render();
-      if (erros.length) $("erro").textContent = "Sem dados agora para: " + erros.join(", ") + " (usando 2022)";
+      if (erros.length) $("erro").textContent = "Sem dados agora para: " + erros.join(", ") + " (fora do total)";
       $("dot").className = "dot";
     } catch (e) {
       $("dot").className = "dot err";
@@ -223,10 +223,11 @@ tr:last-child td{border-bottom:0}
     if (!base || !ultimo) return;
     const p = M.projetar(base, ultimo.vivo, ultimo.br, opts());
     $("pL").textContent = fmtPct(p.lula, 1);
-    $("pF").textContent = fmtPct(1 - p.lula, 1);
-    $("barL").style.width = (p.lula * 100) + "%";
+    $("pF").textContent = p.lula == null ? "–" : fmtPct(1 - p.lula, 1);
+    $("barL").style.width = p.lula == null ? "50%" : (p.lula * 100) + "%";
     const lider = p.margem >= 0 ? "Lula" : "Flávio";
-    $("margem").innerHTML = `${lider} por ${fmtN(Math.abs(p.margem))} votos`;
+    $("margem").innerHTML = p.lula == null ? "nenhuma UF acima do limiar ainda"
+      : `${lider} por ${fmtN(Math.abs(p.margem))} votos`;
     $("bruto").textContent = p.tse.lula == null ? "sem votos ainda"
       : `Lula ${fmtPct(p.tse.lula)} · Flávio ${fmtPct(1 - p.tse.lula)}`;
     $("kPst").textContent = fmtPst(p.tse.pst);
@@ -240,7 +241,7 @@ tr:last-child td{border-bottom:0}
     $("status").innerHTML = `atualizado <b>${new Date().toLocaleTimeString("pt-BR")}</b>`;
 
     // histórico (um ponto por % de seções diferente)
-    const pt = { pst: p.tse.pst, proj: p.lula, bruto: p.tse.lula, t: Date.now(), cfg: opts().peso + opts().limiar };
+    const pt = { pst: p.tse.pst, proj: p.lula, bruto: p.tse.lula, t: Date.now(), cfg: "fora:" + opts().peso + opts().limiar };
     const lastPt = hist[hist.length - 1];
     if (!lastPt || lastPt.pst !== pt.pst || lastPt.cfg !== pt.cfg) {
       hist.push(pt);
@@ -254,7 +255,7 @@ tr:last-child td{border-bottom:0}
     const svg = $("chart"), W = 640, H = 220, L = 44, R = 10, T = 12, B = 26;
     const pts = hist.filter(h => h.cfg === cfg);
     let ys = [];
-    pts.forEach(h => { ys.push(h.proj); if (h.bruto != null) ys.push(h.bruto); });
+    pts.forEach(h => { if (h.proj != null) ys.push(h.proj); if (h.bruto != null) ys.push(h.bruto); });
     ys.push(0.5);
     let lo = Math.min(...ys), hi = Math.max(...ys);
     const padY = Math.max(0.01, (hi - lo) * 0.15); lo -= padY; hi += padY;
@@ -277,7 +278,7 @@ tr:last-child td{border-bottom:0}
     s += `<path d="${path("bruto")}" fill="none" stroke="var(--mut)" stroke-width="2"/>`;
     s += `<path d="${path("proj")}" fill="none" stroke="var(--lula)" stroke-width="2.5"/>`;
     const ult = pts[pts.length - 1];
-    if (ult) s += `<circle cx="${x(ult.pst)}" cy="${y(ult.proj)}" r="4" fill="var(--lula)"/>`;
+    if (ult && ult.proj != null) s += `<circle cx="${x(ult.pst)}" cy="${y(ult.proj)}" r="4" fill="var(--lula)"/>`;
     if (pts.length < 2) s += `<text x="${W/2}" y="${H/2}" text-anchor="middle">a linha aparece conforme a apuração avança</text>`;
     svg.innerHTML = s;
   }
@@ -289,13 +290,13 @@ tr:last-child td{border-bottom:0}
     $("tbody").innerHTML = linhas.map(r => `
       <tr>
         <td><span class="uf">${r.uf.toUpperCase()}</span><span class="nmuf">${r.nome}</span></td>
-        <td>${r.fonte === "apuração" ? '<span class="tag ap">apuração</span>' : '<span class="tag b22">2022</span>'}</td>
+        <td>${r.fonte === "apuração" ? '<span class="tag ap">apuração</span>' : '<span class="tag b22">fora do total</span>'}</td>
         <td><span class="prog"><i style="width:${Math.min(100, r.pst)}%"></i></span>${fmtPst(r.pst)}</td>
         <td>${r.shareAtual == null ? "–" : fmtPct(r.shareAtual, 1)}</td>
         <td>${fmtPct(r.share22, 1)}</td>
-        <td>${fmtPct(r.share, 1)}<span class="split"><i style="width:${r.share*100}%"></i></span></td>
+        <td>${r.share == null ? "–" : `${fmtPct(r.share, 1)}<span class="split"><i style="width:${r.share*100}%"></i></span>`}</td>
         <td>${fmtN(r.eleitorado)}</td>
-        <td class="${r.margem >= 0 ? "mg-l" : "mg-f"}">${r.margem >= 0 ? "Lula +" : "Flávio +"}${fmtN(Math.abs(r.margem))}</td>
+        <td class="${r.margem == null ? "" : r.margem >= 0 ? "mg-l" : "mg-f"}">${r.margem == null ? "–" : (r.margem >= 0 ? "Lula +" : "Flávio +") + fmtN(Math.abs(r.margem))}</td>
       </tr>`).join("");
   }
 
