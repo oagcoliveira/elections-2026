@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projeção 2º Turno 2026</title>
+<style>
+:root{
+  --bg:#f6f5f1; --card:#ffffff; --ink:#18181a; --mut:#6e6b66; --line:#e6e3dc; --soft:#f0eee8;
+  --lula:#c8102e; --lula-soft:#f6d6db; --fla:#1f4fa3; --fla-soft:#d6e1f4; --warn:#9a6700;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#111214; --card:#1a1b1e; --ink:#ececec; --mut:#9a978f; --line:#2b2c30; --soft:#222327;
+         --lula:#ff5c70; --lula-soft:#4a1d24; --fla:#6b9cff; --fla-soft:#1c2a47; --warn:#e3b341; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:15px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;margin:0;color:var(--mut)}
+.status{font-size:13px;color:var(--mut);font-variant-numeric:tabular-nums}
+.status b{color:var(--ink);font-weight:600}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2ea043;margin-right:6px;vertical-align:1px}
+.dot.err{background:#d1242f}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.hero{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:12px}
+.cand .nm{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.cand .pct{font-size:56px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.cand.l .nm,.cand.l .pct{color:var(--lula)}
+.cand.f{text-align:right}
+.cand.f .nm,.cand.f .pct{color:var(--fla)}
+.vs{color:var(--mut);font-size:13px;padding-bottom:10px;text-align:center}
+.bar{position:relative;height:14px;border-radius:7px;overflow:hidden;background:var(--fla);margin:16px 0 8px}
+.bar .l{position:absolute;inset:0 auto 0 0;background:var(--lula);transition:width .6s ease}
+.bar .mid{position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;background:var(--card)}
+.sub{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px;color:var(--mut)}
+.sub b{color:var(--ink);font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:12px 0}
+.kpi .k{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.kpi .v{font-size:22px;font-weight:650;font-variant-numeric:tabular-nums;margin-top:2px}
+.kpi .s{font-size:12px;color:var(--mut);margin-top:2px}
+.row2{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px}
+h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);margin:0 0 10px}
+.ctrl label{display:block;font-size:13px;color:var(--mut);margin:0 0 4px}
+.ctrl .f{margin-bottom:12px}
+.ctrl select,.ctrl input{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--soft);color:var(--ink);font:inherit}
+.ctrl .hint{font-size:12px;color:var(--mut);margin-top:4px}
+button{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--soft);color:var(--ink);font:inherit;cursor:pointer}
+svg text{fill:var(--mut);font-size:11px;font-family:inherit}
+.leg{display:flex;gap:14px;font-size:12px;color:var(--mut);margin-top:6px;flex-wrap:wrap}
+.leg i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:3px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+th{font-size:12px;font-weight:600;color:var(--mut);text-align:right;padding:8px 8px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;user-select:none}
+th:first-child,td:first-child{text-align:left}
+td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px}
+.tag.ap{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.tag.b22{color:var(--warn);border:1px dashed var(--warn)}
+.prog{display:inline-block;width:60px;height:6px;background:var(--soft);border-radius:3px;overflow:hidden;vertical-align:1px;margin-right:6px}
+.prog i{display:block;height:100%;background:var(--mut)}
+.mg-l{color:var(--lula);font-weight:600}.mg-f{color:var(--fla);font-weight:600}
+.split{display:inline-block;width:70px;height:8px;border-radius:4px;background:var(--fla);overflow:hidden;vertical-align:0;margin-left:6px;position:relative}
+.split i{display:block;height:100%;background:var(--lula)}
+.uf{font-weight:600}.nmuf{color:var(--mut);font-size:12px;margin-left:6px}
+.tablewrap{overflow-x:auto}
+.err{color:#d1242f;font-size:13px;margin-top:8px}
+.foot{font-size:12px;color:var(--mut);margin-top:14px;line-height:1.6}
+@media (max-width:760px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .row2{grid-template-columns:1fr}
+  .cand .pct{font-size:40px}
+  .nmuf{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Projeção · 2º turno presidencial 2026</h1>
+    <div class="status"><span id="dot" class="dot"></span><span id="status">carregando…</span></div>
+  </header>
+
+  <section class="card">
+    <div class="hero">
+      <div class="cand l"><div class="nm">Lula</div><div class="pct" id="pL">–</div></div>
+      <div class="vs">projeção</div>
+      <div class="cand f"><div class="nm">Flávio</div><div class="pct" id="pF">–</div></div>
+    </div>
+    <div class="bar"><div class="l" id="barL" style="width:50%"></div><div class="mid"></div></div>
+    <div class="sub">
+      <div>Margem projetada: <b id="margem">–</b></div>
+      <div>TSE bruto: <b id="bruto">–</b></div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <div class="card kpi"><div class="k">Seções totalizadas</div><div class="v" id="kPst">–</div><div class="s" id="kHg">–</div></div>
+    <div class="card kpi"><div class="k">UFs usando apuração</div><div class="v" id="kUfs">–</div><div class="s">o resto usa 2022</div></div>
+    <div class="card kpi"><div class="k">Lula · votos apurados</div><div class="v" id="kVL">–</div><div class="s" id="kVLs">–</div></div>
+    <div class="card kpi"><div class="k">Flávio · votos apurados</div><div class="v" id="kVF">–</div><div class="s" id="kVFs">–</div></div>
+  </div>
+
+  <div class="row2">
+    <section class="card">
+      <h2>Evolução</h2>
+      <svg id="chart" viewBox="0 0 640 220" width="100%" preserveAspectRatio="none" role="img" aria-label="Evolução da projeção"></svg>
+      <div class="leg">
+        <span><i style="background:var(--lula)"></i>Lula projetado</span>
+        <span><i style="background:var(--mut)"></i>Lula bruto TSE</span>
+        <span>eixo x: % de seções totalizadas</span>
+      </div>
+    </section>
+    <section class="card ctrl">
+      <h2>Parâmetros</h2>
+      <div class="f">
+        <label for="limiar">Limiar para usar a apuração da UF</label>
+        <input id="limiar" type="number" min="0" max="100" step="1" value="10">
+        <div class="hint">% de seções totalizadas na UF</div>
+      </div>
+      <div class="f">
+        <label for="peso">Peso de cada UF</label>
+        <select id="peso">
+          <option value="validos">Votos válidos projetados</option>
+          <option value="eleitorado">Só eleitorado (1º turno)</option>
+        </select>
+        <div class="hint">Válidos = eleitorado × taxa de válidos (1º turno antes do limiar, apuração depois)</div>
+      </div>
+      <div class="f">
+        <label for="intervalo">Atualizar a cada</label>
+        <select id="intervalo">
+          <option value="15">15 s</option>
+          <option value="30" selected>30 s</option>
+          <option value="60">60 s</option>
+        </select>
+      </div>
+      <button id="agora">Atualizar agora</button>
+      <div class="err" id="erro"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Por UF</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th data-k="uf">UF</th>
+          <th data-k="fonte">Fonte</th>
+          <th data-k="pst">Seções</th>
+          <th data-k="shareAtual">Lula apurado</th>
+          <th data-k="share22">Lula 2022</th>
+          <th data-k="share">Lula usado</th>
+          <th data-k="eleitorado">Eleitorado</th>
+          <th data-k="margem">Margem projetada</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="foot">
+    Fonte: arquivos públicos de resultados do TSE (eleições 6257 e 6258). Base 2022: 2º turno Lula × Bolsonaro por UF.
+    Eleitorado: 1º turno de 2026. Antes do limiar, a UF usa a divisão de 2022; depois, a divisão atual da apuração, extrapolada para o eleitorado inteiro da UF.
+  </div>
+</div>
+
+<script src="modelo.js"></script>
+<script>
+(function(){
+  const M = window.Modelo;
+  const qs = new URLSearchParams(location.search);
+  const E1 = qs.get("e1") || "6257", E2 = qs.get("e2") || "6258";
+  const pad = e => String(e).padStart(6, "0");
+  const url = (e, uf) => `api/tse?path=${encodeURIComponent(`ele2026/${e}/dados/${uf}/${uf}-c0001-e${pad(e)}-u.jws`)}`;
+  const $ = id => document.getElementById(id);
+  const fmtPct = (x, d=2) => x == null ? "–" : (x*100).toFixed(d).replace(".", ",") + "%";
+  const fmtN = x => Math.round(x).toLocaleString("pt-BR");
+  const fmtPst = x => x.toFixed(2).replace(".", ",") + "%";
+
+  let base = null, ultimo = null, timer = null, sortK = "eleitorado", sortDir = -1;
+  let hist = [];
+  try { hist = JSON.parse(localStorage.getItem("hist-" + E2) || "[]"); } catch(e) { hist = []; }
+
+  async function getJSON(u) {
+    const r = await fetch(u);
+    if (!r.ok) throw new Error(`HTTP ${r.status} em ${decodeURIComponent(u).split("dados/")[1] || u}`);
+    return r.json();
+  }
+  async function todas(e) {
+    const res = await Promise.all(M.UFS.map(uf => getJSON(url(e, uf)).catch(err => ({__err: String(err)}))));
+    const out = {}, erros = [];
+    M.UFS.forEach((uf, i) => { if (res[i].__err) erros.push(uf.toUpperCase()); else out[uf] = res[i]; });
+    return { out, erros };
+  }
+
+  async function carregarBase() {
+    const { out, erros } = await todas(E1);
+    if (erros.length) throw new Error("Falha ao carregar 1º turno de: " + erros.join(", "));
+    base = M.montarBase(out);
+  }
+
+  function opts() {
+    return { limiar: parseFloat($("limiar").value) || 0, peso: $("peso").value };
+  }
+
+  async function atualizar() {
+    $("erro").textContent = "";
+    try {
+      if (!base) await carregarBase();
+      const [{ out, erros }, br] = await Promise.all([todas(E2), getJSON(url(E2, "br")).catch(() => null)]);
+      ultimo = { vivo: out, br };
+      render();
+      if (erros.length) $("erro").textContent = "Sem dados agora para: " + erros.join(", ") + " (usando 2022)";
+      $("dot").className = "dot";
+    } catch (e) {
+      $("dot").className = "dot err";
+      $("erro").textContent = String(e.message || e);
+      $("status").textContent = "erro · tentando de novo";
+    }
+  }
+
+  function render() {
+    if (!base || !ultimo) return;
+    const p = M.projetar(base, ultimo.vivo, ultimo.br, opts());
+    $("pL").textContent = fmtPct(p.lula, 1);
+    $("pF").textContent = fmtPct(1 - p.lula, 1);
+    $("barL").style.width = (p.lula * 100) + "%";
+    const lider = p.margem >= 0 ? "Lula" : "Flávio";
+    $("margem").innerHTML = `${lider} por ${fmtN(Math.abs(p.margem))} votos`;
+    $("bruto").textContent = p.tse.lula == null ? "sem votos ainda"
+      : `Lula ${fmtPct(p.tse.lula)} · Flávio ${fmtPct(1 - p.tse.lula)}`;
+    $("kPst").textContent = fmtPst(p.tse.pst);
+    $("kHg").textContent = p.tse.hg ? `TSE ${p.tse.dg || ""} ${p.tse.hg}` : "–";
+    $("kUfs").textContent = `${p.ufsApuracao} / 28`;
+    $("kVL").textContent = fmtN(p.tse.votosL);
+    $("kVF").textContent = fmtN(p.tse.votosF);
+    const tv = p.tse.votosL + p.tse.votosF;
+    $("kVLs").textContent = tv ? fmtPct(p.tse.votosL / tv) + " dos válidos" : "–";
+    $("kVFs").textContent = tv ? fmtPct(p.tse.votosF / tv) + " dos válidos" : "–";
+    $("status").innerHTML = `atualizado <b>${new Date().toLocaleTimeString("pt-BR")}</b>`;
+
+    // histórico (um ponto por % de seções diferente)
+    const pt = { pst: p.tse.pst, proj: p.lula, bruto: p.tse.lula, t: Date.now(), cfg: opts().peso + opts().limiar };
+    const lastPt = hist[hist.length - 1];
+    if (!lastPt || lastPt.pst !== pt.pst || lastPt.cfg !== pt.cfg) {
+      hist.push(pt);
+      try { localStorage.setItem("hist-" + E2, JSON.stringify(hist.slice(-2000))); } catch(e) {}
+    }
+    desenharChart(pt.cfg);
+    desenharTabela(p.linhas);
+  }
+
+  function desenharChart(cfg) {
+    const svg = $("chart"), W = 640, H = 220, L = 44, R = 10, T = 12, B = 26;
+    const pts = hist.filter(h => h.cfg === cfg);
+    let ys = [];
+    pts.forEach(h => { ys.push(h.proj); if (h.bruto != null) ys.push(h.bruto); });
+    ys.push(0.5);
+    let lo = Math.min(...ys), hi = Math.max(...ys);
+    const padY = Math.max(0.01, (hi - lo) * 0.15); lo -= padY; hi += padY;
+    const xMax = Math.max(10, ...pts.map(h => h.pst));
+    const x = v => L + (v / xMax) * (W - L - R);
+    const y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+    let s = "";
+    const passo = (hi - lo) > 0.12 ? 0.05 : (hi - lo) > 0.05 ? 0.02 : 0.01;
+    for (let v = Math.ceil(lo / passo) * passo; v <= hi; v += passo) {
+      s += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>`;
+      s += `<text x="${L-6}" y="${y(v)+4}" text-anchor="end">${(v*100).toFixed(0)}%</text>`;
+    }
+    s += `<line x1="${L}" x2="${W-R}" y1="${y(0.5)}" y2="${y(0.5)}" stroke="var(--mut)" stroke-dasharray="4 4" stroke-width="1"/>`;
+    for (let i = 0; i <= 4; i++) {
+      const v = xMax * i / 4;
+      s += `<text x="${x(v)}" y="${H-6}" text-anchor="middle">${v.toFixed(0)}%</text>`;
+    }
+    const path = (key) => pts.filter(h => h[key] != null)
+      .map((h, i) => `${i ? "L" : "M"}${x(h.pst).toFixed(1)},${y(h[key]).toFixed(1)}`).join("");
+    s += `<path d="${path("bruto")}" fill="none" stroke="var(--mut)" stroke-width="2"/>`;
+    s += `<path d="${path("proj")}" fill="none" stroke="var(--lula)" stroke-width="2.5"/>`;
+    const ult = pts[pts.length - 1];
+    if (ult) s += `<circle cx="${x(ult.pst)}" cy="${y(ult.proj)}" r="4" fill="var(--lula)"/>`;
+    if (pts.length < 2) s += `<text x="${W/2}" y="${H/2}" text-anchor="middle">a linha aparece conforme a apuração avança</text>`;
+    svg.innerHTML = s;
+  }
+
+  function desenharTabela(linhas) {
+    const v = r => sortK === "uf" ? r.uf : sortK === "fonte" ? r.fonte
+      : sortK === "margem" ? Math.abs(r.margem) : (r[sortK] ?? -1);
+    linhas = [...linhas].sort((a, b) => (v(a) > v(b) ? 1 : v(a) < v(b) ? -1 : 0) * sortDir);
+    $("tbody").innerHTML = linhas.map(r => `
+      <tr>
+        <td><span class="uf">${r.uf.toUpperCase()}</span><span class="nmuf">${r.nome}</span></td>
+        <td>${r.fonte === "apuração" ? '<span class="tag ap">apuração</span>' : '<span class="tag b22">2022</span>'}</td>
+        <td><span class="prog"><i style="width:${Math.min(100, r.pst)}%"></i></span>${fmtPst(r.pst)}</td>
+        <td>${r.shareAtual == null ? "–" : fmtPct(r.shareAtual, 1)}</td>
+        <td>${fmtPct(r.share22, 1)}</td>
+        <td>${fmtPct(r.share, 1)}<span class="split"><i style="width:${r.share*100}%"></i></span></td>
+        <td>${fmtN(r.eleitorado)}</td>
+        <td class="${r.margem >= 0 ? "mg-l" : "mg-f"}">${r.margem >= 0 ? "Lula +" : "Flávio +"}${fmtN(Math.abs(r.margem))}</td>
+      </tr>`).join("");
+  }
+
+  document.querySelectorAll("th[data-k]").forEach(th => th.addEventListener("click", () => {
+    const k = th.dataset.k;
+    if (sortK === k) sortDir *= -1; else { sortK = k; sortDir = (k === "uf" || k === "fonte") ? 1 : -1; }
+    render();
+  }));
+  $("limiar").addEventListener("input", render);
+  $("peso").addEventListener("change", render);
+  $("agora").addEventListener("click", atualizar);
+  $("intervalo").addEventListener("change", agendar);
+
+  function agendar() {
+    clearInterval(timer);
+    timer = setInterval(atualizar, parseInt($("intervalo").value, 10) * 1000);
+  }
+  atualizar(); agendar();
+})();
+</script>
+</body>
+</html>
