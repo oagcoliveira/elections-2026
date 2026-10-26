@@ -78,11 +78,31 @@
       lula: (totL + totF) ? totL / (totL + totF) : null,
       margem: totL - totF,
       tse: { pst: num(br && br.s && br.s.pst), lula: (bl + bf) ? bl / (bl + bf) : null,
-             votosL: bl, votosF: bf, hg: br && br.hg, dg: br && br.dg },
+             votosL: bl, votosF: bf, hg: br && br.hg, dg: br && br.dg,
+             te: num(br && br.e && br.e.te), est: num(br && br.e && br.e.est) },
       ufsApuracao: linhas.filter(r => r.fonte === "apuração").length,
     };
   }
 
-  const api = { UFS, NOMES, BASE22, num, votos, montarBase, projetar };
+  // Decisão matemática: o líder está eleito quando a vantagem supera todos os votos que
+  // ainda podem entrar (eleitorado das seções não totalizadas, como se todos votassem no 2º).
+  // eleitoradoBase: usado quando o payload nacional não traz o eleitorado.
+  function decisao(tse, eleitoradoBase) {
+    const te = tse.te || eleitoradoBase || 0;
+    const est = tse.est || te * tse.pst / 100;
+    const vantagem = Math.abs(tse.votosL - tse.votosF);
+    const lider = tse.votosL === tse.votosF ? null : tse.votosL > tse.votosF ? "Lula" : "Flávio";
+    const restantes = Math.max(0, te - est);
+    // no ritmo atual (vantagem por eleitor apurado = r), decide quando a fração apurada x
+    // do eleitorado satisfaz r·x = 1 − x  →  x = 1/(1+r); convertido para % de seções
+    const r = est ? vantagem / est : 0;
+    const fracEleit = r ? 1 / (1 + r) : null;
+    const secPorEleit = (est && te && tse.pst) ? (tse.pst / 100) / (est / te) : 1;
+    const pstDecide = fracEleit == null ? null : Math.min(100, fracEleit * secPorEleit * 100);
+    return { lider, vantagem, restantes, decidido: lider != null && te > 0 && vantagem > restantes,
+             folga: vantagem - restantes, pstDecide };
+  }
+
+  const api = { UFS, NOMES, BASE22, num, votos, montarBase, projetar, decisao };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.Modelo = api;
 })(this);

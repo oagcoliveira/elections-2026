@@ -39,6 +39,9 @@ h1{font-size:15px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;
 .kpi .k{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
 .kpi .v{font-size:22px;font-weight:650;font-variant-numeric:tabular-nums;margin-top:2px}
 .kpi .s{font-size:12px;color:var(--mut);margin-top:2px}
+.dec{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:start}
+.dec .st{font-size:22px;font-weight:650}
+.dec .st.ok{color:var(--lula)}.dec .st.ok.fla{color:var(--fla)}
 .row2{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px}
 h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);margin:0 0 10px}
 .ctrl label{display:block;font-size:13px;color:var(--mut);margin:0 0 4px}
@@ -67,7 +70,7 @@ tr:last-child td{border-bottom:0}
 .err{color:#d1242f;font-size:13px;margin-top:8px}
 .foot{font-size:12px;color:var(--mut);margin-top:14px;line-height:1.6}
 @media (max-width:760px){
-  .grid{grid-template-columns:repeat(2,1fr)}
+  .grid,.dec{grid-template-columns:repeat(2,1fr)}
   .row2{grid-template-columns:1fr}
   .cand .pct{font-size:40px}
   .nmuf{display:none}
@@ -100,6 +103,16 @@ tr:last-child td{border-bottom:0}
     <div class="card kpi"><div class="k">Lula · votos apurados</div><div class="v" id="kVL">–</div><div class="s" id="kVLs">–</div></div>
     <div class="card kpi"><div class="k">Flávio · votos apurados</div><div class="v" id="kVF">–</div><div class="s" id="kVFs">–</div></div>
   </div>
+
+  <section class="card">
+    <h2>Decisão matemática</h2>
+    <div class="dec">
+      <div class="kpi"><div class="k">Situação</div><div class="st" id="dSt">–</div><div class="s" id="dStS">–</div></div>
+      <div class="kpi"><div class="k">Vantagem atual</div><div class="v" id="dVant">–</div><div class="s" id="dVantS">–</div></div>
+      <div class="kpi"><div class="k">Votos que ainda podem entrar</div><div class="v" id="dRest">–</div><div class="s">eleitorado das seções não totalizadas</div></div>
+      <div class="kpi"><div class="k">Decide em (no ritmo atual)</div><div class="v" id="dPst">–</div><div class="s">% de seções totalizadas</div></div>
+    </div>
+  </section>
 
   <div class="row2">
     <section class="card">
@@ -237,6 +250,16 @@ tr:last-child td{border-bottom:0}
     const tv = p.tse.votosL + p.tse.votosF;
     $("kVLs").textContent = tv ? fmtPct(p.tse.votosL / tv) + " dos válidos" : "–";
     $("kVFs").textContent = tv ? fmtPct(p.tse.votosF / tv) + " dos válidos" : "–";
+    const eleitBase = Object.values(base).reduce((a, b) => a + b.eleitorado, 0);
+    const d = M.decisao(p.tse, eleitBase);
+    $("dSt").textContent = d.decidido ? `${d.lider} eleito` : d.lider ? "em aberto" : "–";
+    $("dSt").className = "st" + (d.decidido ? " ok" + (d.lider === "Flávio" ? " fla" : "") : "");
+    $("dStS").textContent = d.decidido ? `vantagem supera os votos restantes em ${fmtN(d.folga)}`
+      : d.lider ? `faltam ${fmtN(-d.folga)} votos de vantagem` : "sem votos ainda";
+    $("dVant").textContent = fmtN(d.vantagem);
+    $("dVantS").textContent = d.lider ? `${d.lider} na frente` : "–";
+    $("dRest").textContent = fmtN(d.restantes);
+    $("dPst").textContent = d.decidido ? "decidido" : d.pstDecide == null ? "–" : "~" + fmtPst(d.pstDecide);
     $("status").innerHTML = `atualizado <b>${new Date().toLocaleTimeString("pt-BR")}</b>`;
 
     // histórico (um ponto por % de seções diferente)
